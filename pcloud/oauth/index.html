@@ -1,16 +1,62 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="referrer" content="no-referrer">
-  <title>Convx pCloud Anmeldung</title>
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta http-equiv="Cache-Control" content="no-store">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; connect-src 'none'; img-src 'none'; object-src 'none'; frame-src 'none'">
+  <title>Convx – pCloud-Anmeldung abschließen</title>
+  <style>
+    :root{color-scheme:light dark;font:16px system-ui,-apple-system,sans-serif}body{margin:0;min-height:100dvh;display:grid;place-items:center;background:Canvas;color:CanvasText}
+    main{box-sizing:border-box;max-width:480px;padding:28px}h1{font-size:1.5rem;margin:0 0 14px}p{line-height:1.55}
+    a.button{display:none;padding:14px 18px;border-radius:12px;background:#1c6de8;color:#fff;text-decoration:none;font-weight:600;text-align:center;margin:18px 0}
+    a.secondary{display:none;font-size:.88rem;overflow-wrap:anywhere}small{color:GrayText;line-height:1.5;display:block;margin-top:22px}
+  </style>
 </head>
 <body>
-  <h2>Convx pCloud Anmeldung</h2>
-  <p>Die Anmeldung soll in der Android-App
-     abgeschlossen werden.</p>
-  <p>Falls diese Seite im Browser erscheint,
-     muss die App-Link-Verifizierung
-     überprüft werden.</p>
+  <main>
+    <h1>pCloud-Anmeldung für Convx</h1>
+    <p id="status">Die Rückmeldung wird geprüft …</p>
+    <a id="open-app" class="button" rel="noreferrer">Convx öffnen und Anmeldung abschließen</a>
+    <a id="open-link" class="secondary" rel="noreferrer">Alternativ: über Android-App-Link öffnen</a>
+    <small>Die Zugangsdaten werden nicht auf dieser Webseite gespeichert oder an einen Server geschickt. Öffne den Link nur auf dem Android-Gerät mit der installierten Convx-App. Teile diese Seite nicht mit anderen, solange die Anmeldung offen ist.</small>
+  </main>
+  <script>
+  (() => {
+    'use strict';
+    const status = document.getElementById('status');
+    const openApp = document.getElementById('open-app');
+    const openLink = document.getElementById('open-link');
+    const host = 'oskar793.github.io';
+    const path = '/pcloud/oauth/';
+    // A pCloud implicit OAuth response is delivered in the URI fragment (#),
+    // not in an HTTP request to GitHub Pages. Keep it in memory only.
+    const rawFragment = location.hash.substring(1);
+    // Prevent any URI-intent delimiter/injection. OAuth keys and values should
+    // use URI-encoded, ASCII-only query-parameter syntax (without semicolons).
+    if (!rawFragment || rawFragment.length > 8192 || !/^[A-Za-z0-9%_&=.+~:\/-]+$/.test(rawFragment)) {
+      status.textContent = 'Hier ist keine gültige pCloud-Antwort angekommen. Starte die Anmeldung bitte erneut in Convx.';
+      return;
+    }
+    const params = new URLSearchParams(rawFragment);
+    if (!params.has('access_token') || !params.has('state') || !params.has('token_type')) {
+      status.textContent = 'pCloud hat keine vollständigen Anmeldedaten zurückgegeben. Bitte starte die Anmeldung erneut in Convx.';
+      return;
+    }
+    // No token is printed, logged, persisted, or sent to a server. Construct
+    // a package-specific Android intent from the HTTPS app link; the second
+    // #Intent segment is parsed by Android Intent.parseUri, keeping the first
+    // #... as the fragment delivered to Convx's existing callback handler.
+    const intentURL = `intent://${host}${path}#${rawFragment}#Intent;scheme=https;package=com.convx.music;action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;end`;
+    const verifiedURL = `https://${host}${path}#${rawFragment}`;
+    openApp.href = intentURL;
+    openApp.style.display = 'block';
+    openLink.href = verifiedURL;
+    openLink.style.display = 'block';
+    status.textContent = 'pCloud hat eine Anmeldeantwort zurückgegeben. Tippe auf die Schaltfläche, um sie sicher an Convx zu übergeben.';
+  })();
+  </script>
 </body>
 </html>
