@@ -47,7 +47,7 @@
     // OAuth fragment travels in an Intent string extra, not as an HTTP query.
     const encoded = encodeURIComponent(frag);
     open.href = 'intent://oskar793.github.io/pcloud/oauth/' +
-      '#Intent;scheme=https;package=com.convx.music;' +
+      '#Intent;scheme=https;package=com.convx.music.debug;' +
       'action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;' +
       'S.com.convx.music.PCLOUD_OAUTH_FRAGMENT=' + encoded + ';end';
     open.style.display = 'block';
