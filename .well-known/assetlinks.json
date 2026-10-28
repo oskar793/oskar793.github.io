@@ -4,7 +4,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "com.convx.music.debug",
-      "sha256_cert_fingerprints": ["SHA256: C0:98:01:ED:50:28:D7:4B:A1:FB:A0:37:55:25:0E:E1:8C:CB:F6:0F:63:98:3C:D9:DE:C3:37:7B:D6:FA:48:F2"]
+      "sha256_cert_fingerprints": ["C0:98:01:ED:50:28:D7:4B:A1:FB:A0:37:55:25:0E:E1:8C:CB:F6:0F:63:98:3C:D9:DE:C3:37:7B:D6:FA:48:F2"]
     }
   }
 ]
