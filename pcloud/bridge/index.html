@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta http-equiv="Cache-Control" content="no-store">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; connect-src 'none'; img-src 'none'; object-src 'none'; frame-src 'none'">
-  <title>Convx – pCloud-Anmeldung abschließen</title>
+  <title>Convx – pCloud-Anmeldung abschließen (0.6.14)</title>
   <style>
     :root{color-scheme:light dark;font:16px system-ui,-apple-system,sans-serif}
     body{margin:0;min-height:100dvh;display:grid;place-items:center;background:Canvas;color:CanvasText}
@@ -22,7 +22,7 @@
     <h1>pCloud mit Convx verbinden</h1>
     <p id="status">Die Rückmeldung von pCloud wird überprüft …</p>
     <a id="open" class="btn" rel="noreferrer">Anmeldung in Convx abschließen</a>
-    <small>Der Zugriffstoken bleibt ausschließlich im Browser und wird beim Tippen direkt an die installierte Convx-App übergeben. Kein Token wird auf GitHub Pages hochgeladen. Die Adresse nicht kopieren oder weitergeben.</small>
+    <small>0.6.14 – Debug-APK. Das Token wird erst bei deinem Klick direkt an Convx übergeben. Kein Token wird an GitHub Pages gesendet. Diese Adresse bitte nicht weitergeben.</small>
   </main>
   <script>
   (() => {
@@ -32,8 +32,13 @@
     // pCloud returns an implicit-flow token in the URL fragment (#), which
     // is never included in an HTTP request to GitHub Pages.
     const frag = location.hash.length > 1 ? location.hash.slice(1) : '';
+    const failedHandoff = new URLSearchParams(location.search).get('handoff') === 'unsupported';
     // Remove sensitive fragment from the visible URL and current history entry.
     try { history.replaceState(null, '', location.pathname); } catch (_) {}
+    if (failedHandoff) {
+      status.textContent = 'Die Convx-App konnte den Rücksprung nicht öffnen. Prüfe, ob die Debug-APK 0.6.14 installiert ist. Eine neue Anmeldung ist erforderlich.';
+      return;
+    }
     if (!frag || frag.length > 8192 || !/^[A-Za-z0-9%_&=.+~:/-]+$/.test(frag)) {
       status.textContent = 'Keine pCloud-Anmeldeantwort empfangen. Starte den Login bitte erneut aus Convx.';
       return;
@@ -46,10 +51,14 @@
     // Explicit Chrome/Android intent, with a canonical verified HTTPS data URI.
     // OAuth fragment travels in an Intent string extra, not as an HTTP query.
     const encoded = encodeURIComponent(frag);
-    open.href = 'intent://oskar793.github.io/pcloud/oauth/' +
-      '#Intent;scheme=https;package=com.convx.music.debug;' +
+    // Chrome uses the registered, dedicated (non-web) URI, not an HTTPS URL.
+    // The URL itself contains no token. Chrome decodes the Intent extra and
+    // passes it only to the installed Convx debug package.
+    const fallback = encodeURIComponent('https://oskar793.github.io/pcloud/bridge/?handoff=unsupported');
+    open.href = 'intent://callback/#Intent;scheme=convxpcloud;package=com.convx.music.debug;' +
       'action=android.intent.action.VIEW;category=android.intent.category.BROWSABLE;' +
-      'S.com.convx.music.PCLOUD_OAUTH_FRAGMENT=' + encoded + ';end';
+      'S.com.convx.music.PCLOUD_OAUTH_FRAGMENT=' + encoded + ';' +
+      'S.browser_fallback_url=' + fallback + ';end';
     open.style.display = 'block';
     status.textContent = 'pCloud hat eine Anmeldeantwort gesendet. Tippe auf die Schaltfläche, um sie an Convx zu übergeben.';
   })();
